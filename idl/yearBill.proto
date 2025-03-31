@@ -1,0 +1,155 @@
+syntax="proto3";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+option go_package = "yearBill/";
+
+message YearBillPingResponse{
+  string message=1;
+}
+
+message InfoCheckRequest{
+  string stu_num=1;
+}
+
+message InfoCheckResponse{
+  bool flag=1;
+}
+
+message GetCertificateRequest{
+  string openid=1;
+  string stu_num=2;
+}
+
+message GetCertificateResponse{
+  string jsSessionId=1;
+  string hallTicket=2;
+  string gsSession=3;
+  string emaphome_WEU=4;
+}
+
+message DataInitRequest{
+  string jsSessionId=1;
+  string hallTicket=2;
+  string gsSession=3;
+  string emaphome_WEU=4;
+  string stu_num=5;
+}
+
+
+message PayDataInitRequest{
+  string stu_num=2;
+  string hall_ticket=1;
+}
+
+message PayDataInitResponse{
+  int64 flag=1;
+  string favorite_restaurant=2;
+  double favorite_restaurant_pay=7;
+  google.protobuf.Timestamp earlyTime=3;
+  google.protobuf.Timestamp lastTime=4;
+  double other_pay=5;
+  double restaurant_pay=6;
+  double library_pay=8;
+}
+
+message BookDataInitRequest{
+  string stu_num=2;
+  string jsSessionid=1;
+}
+
+message BookDataInitResponse{
+  int64 flag=1;
+}
+
+message LearnDataInitRequest{
+  string stu_num=3;
+  string gsSession=1;
+  string emaphome_WEU=2;
+}
+
+message LearnDataInitResponse{
+  string most_course=4;
+  int64 eight=1;
+  int64 ten=2;
+  int64 sum_lesson=3;
+  int64 most=5;
+  int64 flag=6;
+
+}
+
+message DataStorageRequest{
+  string stu_num=3;
+  LearnDataInitResponse learn_data=1;
+  PayDataInitResponse pay_data=2;
+}
+
+message GetBookDataResponse{
+  int64 read=1;
+  int64 reading=2;
+  string longest=3;
+  int64 day=4;
+}
+
+message GetPayDataRequest{
+  string stu_num=1;
+}
+
+message GetPayDataResponse{
+  string favorite_restaurant=1;
+  google.protobuf.Timestamp earlyTime=2;
+  google.protobuf.Timestamp lastTime=3;
+  double favorite_restaurant_pay=4;
+  double other_pay=5;
+  double restaurant_pay=6;
+  double library_pay=7;
+}
+
+message GetLearnDataRequest{
+  string stu_num=1;
+}
+
+message GetLearnDataResponse{
+  string most_course=4;
+  int64 most=5;
+  int64 eight=1;
+  int64 ten=2;
+  int64 sum_lesson=3;
+}
+
+message GetRankRequest{
+  string stu_num=1;
+}
+
+message GetRankResponse{
+  int64 index=1;
+  int64 appraisal=2;
+  int64 count=3;
+}
+
+message AppraiseRequest{
+  string stu_num=1;
+  int64 appraisal=2;
+}
+
+message CheckStateRequest{
+  string stu_num=1;
+}
+
+message CheckStateResponse{
+  bool state=1;
+}
+service YearBillService{
+  rpc InfoCheck(InfoCheckRequest)returns(InfoCheckResponse);
+  rpc GetCertificate(GetCertificateRequest)returns(GetCertificateResponse);
+  rpc YearBillPing(google.protobuf.Empty)returns(YearBillPingResponse);
+  //rpc PayDataInit(PayDataInitRequest)returns(PayDataInitResponse);
+  //rpc BookDataInit(BookDataInitRequest)returns(BookDataInitResponse);
+  //rpc LearnDataInit(LearnDataInitRequest)returns(LearnDataInitResponse);
+  rpc CheckState(CheckStateRequest)returns(CheckStateResponse);
+  rpc Appraise(AppraiseRequest)returns(google.protobuf.Empty);
+  rpc DataStorage(DataStorageRequest)returns(google.protobuf.Empty);
+  rpc GetLearnData(GetLearnDataRequest)returns(GetLearnDataResponse);
+  rpc GetPayData(GetPayDataRequest)returns(GetPayDataResponse);
+  rpc DataInit(google.protobuf.Empty)returns(google.protobuf.Empty);
+  rpc GetRank(GetRankRequest)returns(GetRankResponse);
+}

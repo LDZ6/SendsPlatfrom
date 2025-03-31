@@ -1,0 +1,86 @@
+server:
+  port: :8889
+
+etcd:
+  address: etcd:2379
+  username: "root"
+  password: ""
+
+mysql:
+  user:
+    driverName: mysql
+    host: db
+    port: 3306
+    database: user
+    username: root
+    password:
+    charset: utf8mb4
+  bobing:
+    driverName: mysql
+    host: db
+    port: 3306
+    database: bo_bing
+    username: root
+    password:
+    charset: utf8mb4
+  year_bill:
+    driverName: mysql
+    host: db
+    port: 3306
+    database: year_bill
+    username: root
+    password:
+    charset: utf8mb4
+
+redis:
+  user:
+    user_name: default
+    address: redis:6379
+    password:
+  bobing:
+    user_name: default
+    address: redis:6379
+    password:
+  school:
+    user_name: default
+    address: redis:6379
+    password:
+  year_bill:
+    user_name: default
+    address: redis:6379
+    password:
+    
+services:
+  user:
+    name: user
+    loadBalance: true
+    addr: user:10002
+  bobing:
+    name: bobing
+    loadBalance: true
+    addr: bobing:10003
+  school:
+    name: school
+    loadBalance: true
+    addr: school:10004
+  year_bill:
+    name: year_bill
+    loadBalance: true
+    addr: year_bill:10005
+
+domain:
+  user:
+    name: user
+  bobing:
+    name: bobing
+  school:
+    name: school
+  year_bill :
+    name: year_bill
+
+mq:
+  year_bill:
+    address: rabbitmq
+    port: 5672
+    username: sends
+    password:

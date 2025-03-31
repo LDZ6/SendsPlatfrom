@@ -1,0 +1,59 @@
+syntax="proto3";
+import "google/protobuf/empty.proto";
+option go_package = "user/";
+
+message UserPingResponse{
+  string message=1;
+}
+
+message UserLoginRequest{
+  string code=1;
+}
+
+message UserLoginResponse{
+  string token=1;
+  string avatar=2;
+  string nick_name=3;
+}
+
+message AdminLoginResponse{
+  string token=1;
+}
+
+message UserJsTicketResponse{
+  string jsTicket=1;
+}
+
+message WxCheckResponse{
+  string openid=1;
+  string data=2;
+}
+
+message GetJwcCertificate{
+  string openid=1;
+}
+
+message AuthorizationResponse{
+  string GsSession=1;
+}
+
+message WxJSSDKRequest{
+  string url=1;
+}
+
+message WxJSSDKResponse{
+  string app_id=1;
+  int64 timestamp=2;
+  string nonce_str=3;
+  string signature=4;
+}
+
+service UserService{
+  rpc UserPing(google.protobuf.Empty)returns(UserPingResponse);
+  rpc UserLogin(UserLoginRequest)returns(UserLoginResponse);
+  rpc MassesLogin(UserLoginRequest)returns(UserLoginResponse);
+  rpc UserJsTicket(google.protobuf.Empty)returns(UserJsTicketResponse);
+  rpc SchoolUserLogin(UserLoginRequest)returns(UserLoginResponse);
+  rpc YearBillLogin(UserLoginRequest)returns(UserLoginResponse);
+  rpc WxJSSDK(WxJSSDKRequest)returns(WxJSSDKResponse);
+}

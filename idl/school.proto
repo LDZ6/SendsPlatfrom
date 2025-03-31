@@ -1,0 +1,64 @@
+syntax="proto3";
+import "google/protobuf/empty.proto";
+option go_package = "school/";
+
+message SchoolPingResponse{
+  string message=1;
+}
+
+message Gpa{
+  string Semester=1;
+  string Gpa=2;
+  string ClassRank=3;
+  string MajorRank=4;
+}
+message SchoolGpaResponse{
+  repeated Gpa gpa=1;
+}
+
+message Schedule{
+  string teachWeek = 1;
+  string lessonName = 2;
+  string week = 3;
+  string beginTime = 4;
+  string endTime = 5;
+  string address = 6;
+  string teacherName = 7;
+}
+
+message SchoolScheduleResponse{
+  repeated Schedule schedules=1;
+}
+
+message Grade{
+  string XNXQDM = 7;
+    string XSKCM = 1;
+    double ZCJ = 2;
+    string XSZCJMC = 3;
+    double XF = 4;
+    string QMCJ = 5;
+    string PSCJ = 6;
+}
+
+message SchoolGradeResponse{
+  repeated Grade grade=1;
+}
+
+message Xytj {
+  string XNXQDM = 1;
+  double YXXF = 2;
+  double YHXF = 3;
+  double BJGXF = 4;
+  double WLCJXF = 5;
+}
+message SchoolXuefenResponse{
+  repeated Xytj xuefen=1;
+}
+service SchoolService{
+  rpc SchoolPing(google.protobuf.Empty)returns(SchoolPingResponse);
+  rpc SchoolGpa(google.protobuf.Empty)returns(SchoolGpaResponse);
+  rpc SchoolSchedule(google.protobuf.Empty)returns(SchoolScheduleResponse);
+  rpc SchoolGrade(google.protobuf.Empty)returns(SchoolGradeResponse);
+  rpc SchoolXuefen(google.protobuf.Empty)returns(SchoolXuefenResponse);
+}
+

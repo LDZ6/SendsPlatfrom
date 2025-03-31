@@ -1,0 +1,100 @@
+syntax="proto3";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+option go_package = "boBing/";
+
+message BoBingPingResponse{
+  string message=1;
+}
+
+message BoBingInitRequest{
+  string stuNum=1;
+  string nickName=2;
+  string openId=3;
+}
+
+message BoBingKeyRequest{
+  string openid=1;
+}
+
+message BoBingKeyResponse{
+  string key=2;
+}
+
+message BoBingPublishRequest{
+  string stuNum=1;
+  string nickName=2;
+  string flag=3;
+  string check=4;
+  string openId=5;
+}
+
+
+message BoBingPublishResponse{
+    string ciphertext=1;
+}
+
+message BoBingRank{
+  string nickName=1;
+  int64 score=2;
+}
+
+message BoBingMyRank{
+  string nickName=1;
+  int64 score=2;
+  int64 rank=3;
+}
+
+message BoBingToTalTenResponse{
+  repeated BoBingRank boBingRank=1;
+  BoBingMyRank BingMyRank=2;
+}
+
+message BoBingDayRankResponse{
+  repeated BoBingRank boBingRank=1;
+  BoBingMyRank BingMyRank=2;
+}
+
+message BoBingTianXuan{
+  string nickName=1;
+  string types=2;
+  google.protobuf.Timestamp time=3;
+}
+
+message BoBingTianXuanResponse{
+  repeated BoBingTianXuan boBingTianXuan=1;
+}
+
+message BoBingGetCountResponse{
+  int64 count=1;
+}
+
+message BoBingBroadcastCheckRequest{
+  string ciphertext = 1;
+  string openId = 2;
+}
+
+message BoBingRecordResponse{
+  map<string,int64> maps =1;
+}
+
+message BoBingGetNumberResponse{
+  int64 number=1;
+}
+
+service BoBingService{
+  rpc BoBingPing(google.protobuf.Empty)returns(BoBingPingResponse);
+//  rpc BoBingInit(BoBingInitRequest)returns(google.protobuf.Empty);
+  rpc BoBingPublish(BoBingPublishRequest)returns(BoBingPublishResponse);
+  rpc BoBingKey(BoBingKeyRequest)returns(BoBingKeyResponse);
+  rpc BoBingToTalTen(google.protobuf.Empty)returns(BoBingToTalTenResponse);
+  rpc BoBingDayRank(google.protobuf.Empty)returns(BoBingDayRankResponse);
+  rpc BoBingDayInit(BoBingInitRequest)returns(google.protobuf.Empty);
+  rpc BoBingTianXuan(google.protobuf.Empty)returns(BoBingTianXuanResponse);
+  rpc BoBingGetCount(google.protobuf.Empty)returns(BoBingGetCountResponse);
+  rpc BoBingRetransmission(google.protobuf.Empty)returns(google.protobuf.Empty);
+  rpc BoBingBroadcastCheck(BoBingBroadcastCheckRequest)returns(google.protobuf.Empty);
+  rpc BoBingRecord(google.protobuf.Empty)returns(BoBingRecordResponse);
+  rpc BoBingBlacklist(google.protobuf.Empty)returns(google.protobuf.Empty);
+  rpc BoBingGetNumber(google.protobuf.Empty)returns(BoBingGetNumberResponse);
+}

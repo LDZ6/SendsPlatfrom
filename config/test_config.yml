@@ -1,0 +1,84 @@
+server:
+  port: :8889
+
+etcd:
+  address: 127.0.0.1:2379
+
+mysql:
+  user:
+    driverName: mysql
+    host: 127.0.0.1
+    port: 3306
+    database: user
+    username: root
+    password: 123456
+    charset: utf8mb4
+  bobing:
+    driverName: mysql
+    host: 127.0.0.1
+    port: 3306
+    database: bo_bing
+    username: root
+    password: 123456
+    charset: utf8mb4
+  year_bill:
+      driverName: mysql
+      host: 127.0.0.1
+      port: 3306
+      database: year_bill
+      username: root
+      password: 123456
+      charset: utf8mb4
+
+redis:
+  user:
+    user_name: default
+    address: 127.0.0.1:6379
+    password:
+  bobing:
+    user_name: default
+    address: 127.0.0.1:6379
+    password:
+  school:
+    user_name: default
+    address: 127.0.0.1:6379
+    password:
+  year_bill:
+      user_name: default
+      address: 127.0.0.1:6379
+      password:
+
+services:
+  user:
+    name: user
+    loadBalance: true
+    addr: 127.0.0.1:10002
+  bobing:
+    name: bobing
+    loadBalance: true
+    addr: 127.0.0.1:10003
+  school:
+    name: school
+    loadBalance: true
+    addr: 127.0.0.1:10004
+  year_bill:
+      name: year_bill
+      loadBalance: true
+      addr: 127.0.0.1:10005
+
+domain:
+  user:
+    name: user
+  bobing:
+    name: bobing
+  school:
+    name: school
+  year_bill:
+    name: year_bill
+
+mq:
+  year_bill:
+    address: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest

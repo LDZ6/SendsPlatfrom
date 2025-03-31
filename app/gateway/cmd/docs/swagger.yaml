@@ -1,0 +1,546 @@
+definitions:
+  types.Appraise:
+    properties:
+      appraisal:
+        type: integer
+    type: object
+  types.BroadcastMessage:
+    properties:
+      ciphertext:
+        type: string
+      message:
+        type: string
+      token:
+        type: string
+    type: object
+  types.CodeInfo:
+    properties:
+      code:
+        description: code
+        type: string
+    type: object
+  types.ResCode:
+    enum:
+    - 1000
+    - 1001
+    - 1002
+    type: integer
+    x-enum-varnames:
+    - CodeSuccess
+    - CodeServerBusy
+    - CodeInvalidParam
+  types.ResponseData:
+    properties:
+      code:
+        $ref: '#/definitions/types.ResCode'
+      data:
+        description: 空的话就不解析了
+      msg: {}
+    type: object
+  types.ScoreMessage:
+    properties:
+      detail:
+        type: string
+      points:
+        type: string
+    type: object
+  types.SemesterInfo:
+    properties:
+      semester:
+        type: string
+    type: object
+  types.UrlInfo:
+    properties:
+      url:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /boBing/addCount:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 转发阅读推文增加次数
+      tags:
+      - 博饼
+  /boBing/dayRank:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 获取博饼日榜（可轮询）
+      tags:
+      - 博饼
+  /boBing/getCount:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 博饼获取当天剩余次数
+      tags:
+      - 博饼
+  /boBing/init:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 博饼每次进入后的初始化操作
+      tags:
+      - 博饼
+  /boBing/key:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 获取密钥
+      tags:
+      - 博饼
+  /boBing/publish:
+    post:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 获取积分及校验,如果是稀有会返回密文，进行广播的校验
+        in: body
+        name: scoreMessage
+        required: true
+        schema:
+          $ref: '#/definitions/types.ScoreMessage'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 提交博饼信息
+      tags:
+      - 博饼
+  /boBing/record:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 查看自己的博饼记录
+      tags:
+      - 博饼
+  /boBing/tianXuan:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 博饼天选榜(可轮询)
+      tags:
+      - 博饼
+  /boBing/top:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 获取前十及自己的信息（可轮询）
+      tags:
+      - 博饼
+  /school/gpa:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 绩点
+      tags:
+      - 学校
+  /school/grade:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 成绩
+      tags:
+      - 学校
+  /school/schedule:
+    post:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 获取学期。举例格式：2023-2024-1
+        in: body
+        name: scoreMessage
+        required: true
+        schema:
+          $ref: '#/definitions/types.SemesterInfo'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 课表
+      tags:
+      - 学校
+  /school/xuefen:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 学分
+      tags:
+      - 学校
+  /user/bill_login:
+    post:
+      parameters:
+      - description: 微信获取code
+        in: body
+        name: codeInfo
+        required: true
+        schema:
+          $ref: '#/definitions/types.CodeInfo'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 年度账单用户登陆
+      tags:
+      - 用户
+  /user/jssdk:
+    post:
+      parameters:
+      - description: 获取url
+        in: body
+        name: codeInfo
+        required: true
+        schema:
+          $ref: '#/definitions/types.UrlInfo'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: JS-SDk权限验证配置
+      tags:
+      - 用户
+  /user/login:
+    post:
+      parameters:
+      - description: 微信获取code
+        in: body
+        name: codeInfo
+        required: true
+        schema:
+          $ref: '#/definitions/types.CodeInfo'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 用户登陆
+      tags:
+      - 用户
+  /user/school_login:
+    post:
+      parameters:
+      - description: 微信获取code
+        in: body
+        name: codeInfo
+        required: true
+        schema:
+          $ref: '#/definitions/types.CodeInfo'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 校内服务用户登陆
+      tags:
+      - 用户
+  /ws/broadcast:
+    get:
+      consumes:
+      - application/json
+      description: Echoes messages sent from the client back to the client
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 获取要广播的内容和token，当提交稀有的博饼记录时，返回密文用于这里进行一个校验
+        in: body
+        name: broadcastMessage
+        required: true
+        schema:
+          $ref: '#/definitions/types.BroadcastMessage'
+      produces:
+      - application/json
+      responses: {}
+      summary: 广播信息（使用websocket）
+      tags:
+      - 博饼
+  /yearBill/appraise:
+    post:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 获取积分及校验,如果是稀有会返回密文，进行广播的校验
+        in: body
+        name: scoreMessage
+        required: true
+        schema:
+          $ref: '#/definitions/types.Appraise'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 对年度账单活动进行评价
+      tags:
+      - 年度账单
+  /yearBill/init:
+    get:
+      description: Echoes messages sent from the client back to the client
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 数据初始化(websocket)
+      tags:
+      - 年度账单
+  /yearBill/learn:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 获得学习数据
+      tags:
+      - 年度账单
+  /yearBill/pay:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 获得花费数据
+      tags:
+      - 年度账单
+  /yearBill/rank:
+    get:
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ResponseData'
+      summary: 获得这是第几份年度账单数据
+      tags:
+      - 年度账单
+swagger: "2.0"
