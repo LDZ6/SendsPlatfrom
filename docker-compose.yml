@@ -1,0 +1,153 @@
+version: "3"
+services:
+  user:
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
+    build:
+      dockerfile: ./app/user/cmd/Dockerfile
+      context: .
+      args:
+        - GOPATH=..
+    depends_on:
+      - db
+      - redis
+  bobing:
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
+    build:
+      dockerfile: ./app/boBing/cmd/Dockerfile
+      context: .
+      args:
+        - GOPATH=..
+    depends_on:
+      - db
+      - redis
+  school:
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
+    build:
+      dockerfile: ./app/school/cmd/Dockerfile
+      context: .
+      args:
+        - GOPATH=..
+    depends_on:
+      - redis
+  year_bill:
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
+    build:
+      dockerfile: ./app/yearBill/cmd/Dockerfile
+      context: .
+      args:
+        - GOPATH=..
+    depends_on:
+      - db
+      - redis
+  gateway:
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
+    build:
+      dockerfile: ./app/gateway/cmd/Dockerfile
+      context: .
+      args:
+        - GOPATH=..
+    ports:
+      - "10811:8889"
+    depends_on:
+      - bobing
+      - user
+      - school
+      - year_bill
+  db:
+    image: mysql:5.7.18
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
+    environment:
+      - SET_CONTAINER_TIMEZONE=true
+      - CONTAINER_TIMEZONE=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_PASSWORD=
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ../mysql:/var/lib/mysql
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --init-connect='SET NAMES utf8mb4;' --innodb-flush-log-at-trx-commit=0
+    ports:
+      - "10821:3306"
+
+  redis:
+    image: redis:7.0.12-alpine
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
+    command: redis-server --requirepass
+    volumes:
+      - ../redis:/data
+    ports:
+      - "10916:6379"
+
+  etcd:
+    image: bitnami/etcd:3.4.15
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
+    volumes:
+      - ../etcd_data:/bitnami/etcd
+    environment:
+      ETCD_ENABLE_V2: "true"
+      ALLOW_NONE_AUTHENTICATION: "no"
+      ETCD_ADVERTISE_CLIENT_URLS: "http://etcd:2379"
+      ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
+      ETCD_ROOT_PASSWORD: ""
+    ports:
+      - "62379:2379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: "rabbitmq"
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ../rabbitmq/data/:/var/lib/rabbitmq
+    environment:
+      - SET_CONTAINER_TIMEZONE=true
+      - CONTAINER_TIMEZONE=Asia/Shanghai
+      - RABBITMQ_DEFAULT_USER=
+      - RABBITMQ_DEFAULT_PASS=
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
