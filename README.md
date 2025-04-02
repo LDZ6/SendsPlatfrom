@@ -1,96 +1,170 @@
-# 华侨大学桑梓微助手 - 部分后端服务
+# 华侨大学桑梓微助手部分服务
 
 ## 项目概述
+**项目名称**: 桑梓微助手部分后端服务
 
-**项目名称**：华侨大学桑梓微助手（部分后端服务）  
-**项目链接**：[GitHub 仓库](https://github.com/LDZ6/SendsPlatfrom)  
-**项目起始时间**：2024 年 07 月 - 至今  
-**项目简介**：本项目是一个微信公众号的部分后端服务，提供了多个微服务，包括教务处、博饼游戏、用户管理及年度账单服务。
+**项目周期**: 2024年07月 - 至今
 
-## 功能模块
+**项目地址**: [GitHub](https://github.com/LDZ6/SendsPlatfrom)
 
-### 1. 教务处微服务
-- 提供学生课表、成绩、学分等信息查询。
-- 采用 `goroutine` 进行多线程爬虫爬取，提高数据获取和处理效率。
-
-### 2. 博饼游戏微服务
-- 线上举办福建当地的中秋节博饼活动。
-- 采用 `Zset` 数据结构存储和排序用户分数，提高查询效率。
-- 使用 `AES` 加密用户敏感信息，保障数据安全和隐私。
-- 实现排行榜及实时播报功能。
-
-### 3. 年度总结微服务
-- 爬取用户消费记录并生成年度报告。
-- 采用 `RabbitMQ` 作为消息中间件，实现异步处理、削峰填谷、解耦。
-- 采用 `多线程爬虫` 爬取学校相关 API，提高爬取效率。
-- 采用 `WebSocket` 实现用户数据加载进度的实时展示，提高用户体验。
-
-### 4. 用户微服务
-- 负责登录身份校验及部分微信公众号官方功能。
-- 针对不同用户群体（公众、在校生、校友）提供不同微服务，满足个性化需求。
-
-### 5. 网关服务
-- 采用自定义 `令牌桶` 算法对部分接口进行限流，防止系统过载，提升稳定性。
+**项目简介**:
+本项目是华侨大学桑梓微助手微信公众号的部分后端服务，提供四个核心微服务：
+1. **教务处微服务**：提供学生的课表、成绩、学分等信息查询功能。
+2. **博饼游戏微服务**：举办福建中秋节博饼活动，包含排行榜和实时播报功能。
+3. **年度总结微服务**：爬取用户消费记录，并生成年度账单报告。
+4. **用户微服务**：负责登录身份校验及部分微信公众号官方功能。
 
 ## 技术栈
-- **后端框架**：Gin（Go 语言的 Web 框架）
-- **数据库**：MySQL（关系型数据库）、Redis（缓存与存储）
-- **ORM 框架**：Gorm（Go 语言的 ORM 框架）
-- **消息队列**：RabbitMQ（异步处理、削峰填谷）
-- **服务发现与注册**：Etcd
-- **微服务通信**：gRPC
-- **API 文档**：Swagger
-- **容器化**：Docker Compose
-- **微信公众号开发**：微信公众号 API
-- **数据爬取**：多线程爬虫
-- **安全加密**：AES 数据加密
-- **并发控制**：令牌桶限流、自定义 Goroutine 池
+- **后端框架**: Gin
+- **数据库**: MySQL、Redis
+- **ORM框架**: Gorm
+- **API文档**: Swagger
+- **消息队列**: RabbitMQ
+- **服务发现与配置**: Etcd
+- **微服务通信**: Grpc
+- **容器化部署**: Docker Compose
+- **微信公众号开发**: 微信公众号 API
+- **其他**: 多线程爬虫、数据加密、并发控制
 
-## 项目架构
-本项目采用 **微服务架构** 进行设计，各个服务独立运行，通过 `gRPC` 进行高效通信，同时结合 `RabbitMQ` 进行异步消息处理，`Redis` 提供缓存加速。整体架构如下：
+## 关键技术实现
+### 1. 博饼游戏微服务
+- **使用 Zset 存储与排序用户分数**，提高查询效率与准确性。
+- **AES 加密用户敏感信息**，保障数据安全和隐私。
 
-1. **微服务模块**：教务处、博饼游戏、用户管理、年度总结等。
-2. **数据存储**：MySQL 存储核心业务数据，Redis 作为缓存。
-3. **消息队列**：RabbitMQ 实现异步任务处理。
-4. **网关限流**：采用令牌桶算法，防止 API 过载。
-5. **安全保障**：AES 加密用户数据，保证数据隐私。
+### 2. 年度总结微服务
+- **RabbitMQ 作为消息中间件**，实现异步处理、削峰填谷、解耦。
+- **多线程爬虫高效爬取学校 API**，提高数据抓取速度。
+- **WebSocket 实时显示数据加载进度**，优化用户体验。
+
+### 3. 用户微服务
+- **面向不同人群（公众、在校生、校友）** 进行微服务拆分，满足不同需求。
+
+### 4. 教务处微服务
+- **使用 goroutine 进行多线程爬取**，提升数据获取与处理效率。
+
+### 5. 网关部分
+- **自定义令牌桶算法限流**，保证系统稳定，防止流量过载。
+
+## 服务架构
+本项目采用 **微服务架构**，通过 gRPC 进行服务间通信，Etcd 进行服务发现，并结合 RabbitMQ 进行异步消息处理。
+
+### **Docker Compose 服务配置**
+```yaml
+version: "3"
+services:
+  user:
+    restart: unless-stopped
+    build:
+      dockerfile: ./app/user/cmd/Dockerfile
+      context: .
+    depends_on:
+      - db
+      - redis
+  bobing:
+    restart: unless-stopped
+    build:
+      dockerfile: ./app/boBing/cmd/Dockerfile
+      context: .
+    depends_on:
+      - db
+      - redis
+  school:
+    restart: unless-stopped
+    build:
+      dockerfile: ./app/school/cmd/Dockerfile
+      context: .
+    depends_on:
+      - redis
+  year_bill:
+    restart: unless-stopped
+    build:
+      dockerfile: ./app/yearBill/cmd/Dockerfile
+      context: .
+    depends_on:
+      - db
+      - redis
+  gateway:
+    restart: unless-stopped
+    build:
+      dockerfile: ./app/gateway/cmd/Dockerfile
+      context: .
+    ports:
+      - "10811:8889"
+    depends_on:
+      - bobing
+      - user
+      - school
+      - year_bill
+  db:
+    image: mysql:5.7.18
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=yourpassword
+      - MYSQL_PASSWORD=yourpassword
+    ports:
+      - "10821:3306"
+  redis:
+    image: redis:7.0.12-alpine
+    restart: unless-stopped
+    ports:
+      - "10916:6379"
+  etcd:
+    image: bitnami/etcd:3.4.15
+    restart: unless-stopped
+    ports:
+      - "62379:2379"
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+```
 
 ## 部署与运行
-### 1. 依赖环境
-- Go 1.18 及以上
-- MySQL 8.0 及以上
-- Redis 6.0 及以上
-- Docker & Docker Compose
-- RabbitMQ
-- Etcd
+### 1. **克隆项目**
+```sh
+git clone https://github.com/LDZ6/SendsPlatfrom.git
+cd SendsPlatfrom
+```
 
-### 2. 运行步骤
-1. 克隆仓库：
-   ```bash
-   git clone https://github.com/jiuchengyouni/SendsPlatfrom.git
-   cd SendsPlatfrom
-   ```
-2. 启动 `Docker Compose` 运行相关服务：
-   ```bash
-   docker-compose up -d
-   ```
-3. 运行微服务：
-   ```bash
-   go run main.go
-   ```
+### 2. **配置环境变量**
+修改 `.env` 文件，填入 MySQL、Redis、RabbitMQ 相关配置。
+
+### 3. **使用 Docker Compose 启动服务**
+```sh
+docker-compose up -d
+```
+
+### 4. **访问 API 文档**
+Swagger API 文档默认开放在 `http://localhost:8080/swagger/index.html`
+
+## 代码结构
+```
+SendsPlatfrom/
+│── app/
+│   ├── user/        # 用户微服务
+│   ├── boBing/      # 博饼游戏微服务
+│   ├── school/      # 教务处微服务
+│   ├── yearBill/    # 年度总结微服务
+│   ├── gateway/     # API 网关
+│── config/          # 配置文件
+│── docs/            # Swagger API 文档
+│── scripts/         # 部署脚本
+│── docker-compose.yml # 容器化配置
+│── main.go          # 入口文件
+```
 
 ## 项目收获
-本项目让我深入理解了微服务架构的设计与实现，同时提升了以下能力：
-- 关系型数据库（MySQL）与非关系型数据库（Redis）的优化与应用。
-- 高效的数据爬取与并发控制，提高爬取速度和准确性。
-- 微服务架构下的安全设计，如数据加密、限流保护。
-- 微信公众号开发技能，包括身份校验、用户交互等。
+- 深入掌握 **微服务架构设计与实现**。
+- 提升 **关系型数据库与非关系型数据库优化能力**。
+- 练习 **高并发编程与异步处理技术**。
+- 积累 **微信公众号开发经验**。
+- 通过实际应用 **提高用户体验**，获得广泛好评。
 
-本项目不仅为全校师生提供了便捷的教学与生活服务，还收获了广泛好评。同时，也让我深刻体会到编程的乐趣，以及技术对实际生活的积极影响。
-
-## 贡献
-如果你对本项目感兴趣，欢迎提出 `Issue` 或 `Pull Request`，共同优化和完善本项目。
+## 贡献指南
+如果你有兴趣为该项目贡献代码或提出改进意见，请参考 [贡献指南](CONTRIBUTING.md)。
 
 ## 许可证
-本项目遵循 MIT 许可证，详情请见 [LICENSE](./LICENSE) 文件。
+本项目遵循 [MIT 许可证](LICENSE)。
 
