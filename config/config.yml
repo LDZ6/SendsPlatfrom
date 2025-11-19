@@ -4,7 +4,7 @@ server:
 etcd:
   address: etcd:2379
   username: "root"
-  password: ""
+  # password: 从环境变量 ETCD_PASSWORD 获取
 
 mysql:
   user:
@@ -13,7 +13,7 @@ mysql:
     port: 3306
     database: user
     username: root
-    password:
+    # password: 从环境变量 MYSQL_USER_PASSWORD 获取
     charset: utf8mb4
   bobing:
     driverName: mysql
@@ -21,7 +21,7 @@ mysql:
     port: 3306
     database: bo_bing
     username: root
-    password:
+    # password: 从环境变量 MYSQL_BOBING_PASSWORD 获取
     charset: utf8mb4
   year_bill:
     driverName: mysql
@@ -29,26 +29,26 @@ mysql:
     port: 3306
     database: year_bill
     username: root
-    password:
+    # password: 从环境变量 MYSQL_YEARBILL_PASSWORD 获取
     charset: utf8mb4
 
 redis:
   user:
     user_name: default
     address: redis:6379
-    password:
+    # password: 从环境变量 REDIS_USER_PASSWORD 获取
   bobing:
     user_name: default
     address: redis:6379
-    password:
+    # password: 从环境变量 REDIS_BOBING_PASSWORD 获取
   school:
     user_name: default
     address: redis:6379
-    password:
+    # password: 从环境变量 REDIS_SCHOOL_PASSWORD 获取
   year_bill:
     user_name: default
     address: redis:6379
-    password:
+    # password: 从环境变量 REDIS_YEARBILL_PASSWORD 获取
     
 services:
   user:
@@ -82,5 +82,35 @@ mq:
   year_bill:
     address: rabbitmq
     port: 5672
-    username: sends
-    password:
+    username: platform
+    # password: 从环境变量 RABBITMQ_PASSWORD 获取
+
+# JWT多密钥配置
+jwt:
+  keys:
+    v1: "your-jwt-secret-v1"
+    v2: "your-jwt-secret-v2"
+  currentKeyId: "v2"
+  expirationHours: 24
+
+# 加密配置
+crypto:
+  keyVersion: "v1"
+  algorithm: "AES-GCM"
+
+# 可观测性配置
+observability:
+  logging:
+    level: "info"
+    format: "json"
+    sampling:
+      errorRate: 1.0
+      normalRate: 0.1
+  metrics:
+    enabled: true
+    path: "/metrics"
+    port: 9090
+  tracing:
+    enabled: true
+    sampleRate: 0.1
+    serviceName: "sends-platform"

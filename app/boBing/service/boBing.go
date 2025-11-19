@@ -176,9 +176,9 @@ func (*BoBingSrv) BoBingPublish(ctx context.Context, req *BoBingPb.BoBingPublish
 	if !valid {
 		err = cacheRDB.SaveBlacklist(req.OpenId)
 		if err != nil {
-			return nil, errors.New("检测到你有作弊行为，已被封号")
+			return nil, utils.WrapRedisError(err, "保存黑名单")
 		}
-		return nil, errors.New("检测到你有作弊行为，已被封号")
+		return nil, utils.ErrBoBingCheat
 	}
 	if err != nil {
 		return
@@ -188,9 +188,9 @@ func (*BoBingSrv) BoBingPublish(ctx context.Context, req *BoBingPb.BoBingPublish
 	if err != nil {
 		err = cacheRDB.SaveBlacklist(req.OpenId)
 		if err != nil {
-			return nil, errors.New("检测到你有作弊行为，已被封号")
+			return nil, utils.WrapRedisError(err, "保存黑名单")
 		}
-		return nil, errors.New("检测到你有作弊行为，已被封号")
+		return nil, utils.ErrBoBingCheat
 	}
 	err = cacheRDB.SaveQuaternion(quaternions)
 	if err != nil {
@@ -205,9 +205,9 @@ func (*BoBingSrv) BoBingPublish(ctx context.Context, req *BoBingPb.BoBingPublish
 	if flag > 16 || flag < 1 {
 		err = cacheRDB.SaveBlacklist(req.OpenId)
 		if err != nil {
-			return nil, errors.New("检测到你有作弊行为，已被封号")
+			return nil, utils.WrapRedisError(err, "保存黑名单")
 		}
-		return nil, errors.New("检测到你有作弊行为，已被封号")
+		return nil, utils.ErrBoBingInvalidFlag
 	}
 	boBingMessage := pkg.NewBoBingMessageTransform()
 	boBingMessage.SetType(flag)
@@ -476,7 +476,7 @@ func (*BoBingSrv) BoBingRetransmission(ctx context.Context, empty *emptypb.Empty
 			return
 		}
 	} else {
-		return nil, errors.New("今日增加投掷次数已达上限")
+		return nil, utils.ErrBoBingNoChance
 	}
 	cacheRDB := cache.NewRDBCache(ctx)
 	err = cacheRDB.SaveDayCount(today, submission)

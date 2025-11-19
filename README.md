@@ -1,170 +1,203 @@
-# 华侨大学桑梓微助手部分服务
+# SendsPlatform
 
-## 项目概述
-**项目名称**: 桑梓微助手部分后端服务
+一个基于微服务架构的校园服务平台，提供用户管理、博饼游戏、学校信息查询、年度账单等功能。项目采用Go语言开发，使用gRPC进行服务间通信，支持分布式事务处理。
 
-**项目周期**: 2024年07月 - 至今
+## 功能特性
 
-**项目地址**: [GitHub](https://github.com/LDZ6/SendsPlatfrom)
+### 核心业务功能
+- **用户管理**: 微信登录、用户信息管理、多平台账号绑定
+- **博饼游戏**: 在线博饼游戏系统、实时排名、游戏记录
+- **学校服务**: 课表查询、成绩查询、学分查询、GPA统计
+- **年度账单**: 学习数据统计、消费记录分析、个人成长报告
 
-**项目简介**:
-本项目是华侨大学桑梓微助手微信公众号的部分后端服务，提供四个核心微服务：
-1. **教务处微服务**：提供学生的课表、成绩、学分等信息查询功能。
-2. **博饼游戏微服务**：举办福建中秋节博饼活动，包含排行榜和实时播报功能。
-3. **年度总结微服务**：爬取用户消费记录，并生成年度账单报告。
-4. **用户微服务**：负责登录身份校验及部分微信公众号官方功能。
+### 技术特性
+- **微服务架构**: 基于gRPC的微服务设计，支持独立部署和扩展
+- **分布式事务**: 集成TCC模式保证数据一致性
+- **服务发现**: 基于Etcd的服务注册与发现机制
+- **负载均衡**: 支持多实例负载均衡和故障转移
+- **可观测性**: 集成日志、指标、链路追踪系统
+- **安全性**: 多层安全防护，支持JWT认证和RBAC权限控制
+- **高性能**: 基于Gin框架的高性能HTTP服务，支持连接复用和请求合并
 
-## 技术栈
-- **后端框架**: Gin
-- **数据库**: MySQL、Redis
-- **ORM框架**: Gorm
-- **API文档**: Swagger
-- **消息队列**: RabbitMQ
-- **服务发现与配置**: Etcd
-- **微服务通信**: Grpc
-- **容器化部署**: Docker Compose
-- **微信公众号开发**: 微信公众号 API
-- **其他**: 多线程爬虫、数据加密、并发控制
+## 软件架构
 
-## 关键技术实现
-### 1. 博饼游戏微服务
-- **使用 Zset 存储与排序用户分数**，提高查询效率与准确性。
-- **AES 加密用户敏感信息**，保障数据安全和隐私。
-
-### 2. 年度总结微服务
-- **RabbitMQ 作为消息中间件**，实现异步处理、削峰填谷、解耦。
-- **多线程爬虫高效爬取学校 API**，提高数据抓取速度。
-- **WebSocket 实时显示数据加载进度**，优化用户体验。
-
-### 3. 用户微服务
-- **面向不同人群（公众、在校生、校友）** 进行微服务拆分，满足不同需求。
-
-### 4. 教务处微服务
-- **使用 goroutine 进行多线程爬取**，提升数据获取与处理效率。
-
-### 5. 网关部分
-- **自定义令牌桶算法限流**，保证系统稳定，防止流量过载。
-
-## 服务架构
-本项目采用 **微服务架构**，通过 gRPC 进行服务间通信，Etcd 进行服务发现，并结合 RabbitMQ 进行异步消息处理。
-
-### **Docker Compose 服务配置**
-```yaml
-version: "3"
-services:
-  user:
-    restart: unless-stopped
-    build:
-      dockerfile: ./app/user/cmd/Dockerfile
-      context: .
-    depends_on:
-      - db
-      - redis
-  bobing:
-    restart: unless-stopped
-    build:
-      dockerfile: ./app/boBing/cmd/Dockerfile
-      context: .
-    depends_on:
-      - db
-      - redis
-  school:
-    restart: unless-stopped
-    build:
-      dockerfile: ./app/school/cmd/Dockerfile
-      context: .
-    depends_on:
-      - redis
-  year_bill:
-    restart: unless-stopped
-    build:
-      dockerfile: ./app/yearBill/cmd/Dockerfile
-      context: .
-    depends_on:
-      - db
-      - redis
-  gateway:
-    restart: unless-stopped
-    build:
-      dockerfile: ./app/gateway/cmd/Dockerfile
-      context: .
-    ports:
-      - "10811:8889"
-    depends_on:
-      - bobing
-      - user
-      - school
-      - year_bill
-  db:
-    image: mysql:5.7.18
-    restart: unless-stopped
-    environment:
-      - MYSQL_ROOT_PASSWORD=yourpassword
-      - MYSQL_PASSWORD=yourpassword
-    ports:
-      - "10821:3306"
-  redis:
-    image: redis:7.0.12-alpine
-    restart: unless-stopped
-    ports:
-      - "10916:6379"
-  etcd:
-    image: bitnami/etcd:3.4.15
-    restart: unless-stopped
-    ports:
-      - "62379:2379"
-  rabbitmq:
-    image: rabbitmq:3-management
-    restart: unless-stopped
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   API Gateway   │    │   User Service  │    │  BoBing Service │
+│   (Port: 8889)  │    │  (Port: 10002)  │    │  (Port: 10003)  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+         ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+         │ School Service  │    │ YearBill Service│    │  Common Library │
+         │ (Port: 10004)   │    │ (Port: 10005)   │    │   (Shared)      │
+         └─────────────────┘    └─────────────────┘    └─────────────────┘
+                                 │
+         ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+         │     MySQL       │    │      Redis      │    │     RabbitMQ    │
+         │   (Port: 3306)  │    │   (Port: 6379)  │    │   (Port: 5672)  │
+         └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-## 部署与运行
-### 1. **克隆项目**
-```sh
-git clone https://github.com/LDZ6/SendsPlatfrom.git
-cd SendsPlatfrom
+## 快速开始
+
+### 依赖检查
+
+确保您的系统已安装以下依赖：
+
+- **Go 1.21+**: 用于编译和运行Go程序
+- **Docker & Docker Compose**: 用于容器化部署
+- **MySQL 8.0+**: 数据存储
+- **Redis 7.2+**: 缓存和会话存储
+- **Etcd 3.5+**: 服务发现
+- **RabbitMQ**: 消息队列
+- **Protobuf**: 用于gRPC接口定义
+
+### 构建
+
+1. **克隆项目**
+```bash
+git clone https://github.com/your-org/SendsPlatform.git
+cd SendsPlatform
 ```
 
-### 2. **配置环境变量**
-修改 `.env` 文件，填入 MySQL、Redis、RabbitMQ 相关配置。
-
-### 3. **使用 Docker Compose 启动服务**
-```sh
-docker-compose up -d
+2. **安装依赖**
+```bash
+make deps
 ```
 
-### 4. **访问 API 文档**
-Swagger API 文档默认开放在 `http://localhost:8080/swagger/index.html`
-
-## 代码结构
-```
-SendsPlatfrom/
-│── app/
-│   ├── user/        # 用户微服务
-│   ├── boBing/      # 博饼游戏微服务
-│   ├── school/      # 教务处微服务
-│   ├── yearBill/    # 年度总结微服务
-│   ├── gateway/     # API 网关
-│── config/          # 配置文件
-│── docs/            # Swagger API 文档
-│── scripts/         # 部署脚本
-│── docker-compose.yml # 容器化配置
-│── main.go          # 入口文件
+3. **生成代码**
+```bash
+make proto
+make swagger
 ```
 
-## 项目收获
-- 深入掌握 **微服务架构设计与实现**。
-- 提升 **关系型数据库与非关系型数据库优化能力**。
-- 练习 **高并发编程与异步处理技术**。
-- 积累 **微信公众号开发经验**。
-- 通过实际应用 **提高用户体验**，获得广泛好评。
+4. **构建所有服务**
+```bash
+make build
+```
 
-## 贡献指南
-如果你有兴趣为该项目贡献代码或提出改进意见，请参考 [贡献指南](CONTRIBUTING.md)。
+### 运行
+
+1. **配置环境变量**
+```bash
+cp env.example .env
+# 编辑 .env 文件，配置必要的环境变量
+```
+
+2. **启动开发环境**
+```bash
+make dev
+```
+
+3. **验证服务**
+```bash
+# 健康检查
+make health
+
+# 查看服务状态
+make docker-logs
+```
+
+## 使用指南
+
+### API接口
+
+#### 网关服务 (端口: 8889)
+- **健康检查**: `GET /health`
+- **API文档**: `GET /swagger/index.html`
+
+#### 用户服务
+- **用户登录**: `POST /user/login`
+- **学校登录**: `POST /user/school_login`
+- **年度账单登录**: `POST /user/bill_login`
+
+#### 博饼服务
+- **获取排名**: `GET /boBing/top`
+- **投掷**: `POST /boBing/publish`
+- **获取记录**: `GET /boBing/record`
+
+#### 学校服务
+- **课表查询**: `POST /school/schedule`
+- **学分查询**: `GET /school/xuefen`
+- **GPA查询**: `GET /school/gpa`
+- **成绩查询**: `GET /school/grade`
+
+#### 年度账单服务
+- **学习数据**: `GET /yearBill/learn`
+- **消费数据**: `GET /yearBill/pay`
+- **排名数据**: `GET /yearBill/rank`
+- **评价**: `POST /yearBill/appraise`
+
+### 开发指南
+
+#### 代码规范
+```bash
+# 格式化代码
+make fmt
+
+# 代码检查
+make lint
+
+# 运行测试
+make test
+```
+
+#### 添加新服务
+1. 创建服务目录: `mkdir -p app/newservice/{cmd,database,service,types}`
+2. 定义gRPC接口: 在 `idl/` 目录下创建 `.proto` 文件
+3. 生成代码: `make proto`
+4. 实现服务逻辑: 参考现有服务的实现模式
+5. 更新配置: 在 `config/config.yml` 和 `docker-compose.yml` 中添加服务定义
+
+#### 数据库迁移
+```bash
+# 创建迁移文件
+make migrate-create
+
+# 运行迁移
+make migrate-up
+
+# 回滚迁移
+make migrate-down
+```
+
+## 如何贡献
+
+我们欢迎所有形式的贡献！请遵循以下步骤：
+
+1. **Fork项目** 到您的GitHub账户
+2. **创建特性分支** `git checkout -b feature/amazing-feature`
+3. **提交更改** `git commit -m 'Add some amazing feature'`
+4. **推送到分支** `git push origin feature/amazing-feature`
+5. **创建Pull Request** 描述您的更改
+
+### 贡献指南
+- 遵循Go代码规范
+- 添加适当的测试用例
+- 更新相关文档
+- 确保所有测试通过
+
+## 社区
+
+- **问题反馈**: [GitHub Issues](https://github.com/your-org/SendsPlatform/issues)
+- **功能建议**: [GitHub Discussions](https://github.com/your-org/SendsPlatform/discussions)
+- **技术交流**: 加入我们的技术交流群
+
+## 关于作者
+
+本项目由校园服务团队开发维护，致力于为校园用户提供便捷的数字化服务。
+
+- **项目维护者**: [Your Name](mailto:your.email@example.com)
+- **项目地址**: https://github.com/your-org/SendsPlatform
+
+## 谁在用
+
+- **校园A**: 使用本平台提供学生服务
+- **校园B**: 集成博饼游戏功能
+- **校园C**: 部署年度账单服务
 
 ## 许可证
-本项目遵循 [MIT 许可证](LICENSE)。
 
+本项目采用MIT许可证 - 查看[LICENSE](LICENSE)文件了解详情。

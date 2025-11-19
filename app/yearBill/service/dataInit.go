@@ -4,9 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/go-redis/redis"
-	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"platform/app/yearBill/database/cache"
 	"platform/app/yearBill/database/dao"
 	"platform/app/yearBill/database/model"
@@ -14,9 +11,13 @@ import (
 	"platform/app/yearBill/script"
 	"platform/config"
 	YearBillPb "platform/idl/pb/yearBill"
+	"platform/utils"
 	"platform/utils/school"
 	"sync"
 	"time"
+
+	"github.com/redis/go-redis/v9"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // 判断是否有数据，同时统计参与人数
@@ -40,7 +41,6 @@ func (*YearBillSrv) InfoCheck(ctx context.Context, req *YearBillPb.InfoCheckRequ
 func (*YearBillSrv) GetCertificate(ctx context.Context, req *YearBillPb.GetCertificateRequest) (resp *YearBillPb.GetCertificateResponse, err error) {
 	resp = new(YearBillPb.GetCertificateResponse)
 	//先查看缓存中有没有凭证（写不下去了）
-
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 	var mutex sync.Mutex
@@ -106,7 +106,7 @@ func (*YearBillSrv) GetCertificate(ctx context.Context, req *YearBillPb.GetCerti
 			StuNum:       req.StuNum,
 		})
 		if err != nil {
-			logrus.Info(err.Error())
+			utils.Info(err.Error())
 		}
 		return
 	} else if users[0].Init == 1 {
@@ -128,7 +128,7 @@ func (*YearBillSrv) GetCertificate(ctx context.Context, req *YearBillPb.GetCerti
 			StuNum:       req.StuNum,
 		})
 		if err != nil {
-			logrus.Info(err.Error())
+			utils.Info(err.Error())
 		}
 		return
 	}
@@ -152,7 +152,7 @@ func (*YearBillSrv) DataInit(ctx context.Context, req *emptypb.Empty) (empty *em
 			var task model.DadaInitTask
 			errTask := json.Unmarshal(d.Body, &task)
 			if errTask != nil {
-				logrus.Info(errTask.Error())
+				utils.Info(errTask.Error())
 				return
 			}
 			data := RDBCache.GetRank(task.StuNum)
@@ -246,7 +246,7 @@ func (*YearBillSrv) DataInit(ctx context.Context, req *emptypb.Empty) (empty *em
 		}()
 		select {
 		case <-ctxTask.Done():
-			logrus.Info("获取数据失败")
+			utils.Info("获取数据失败")
 			cancel()
 			break
 		}

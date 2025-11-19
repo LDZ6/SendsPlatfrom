@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"platform/app/user/database/cache"
 	"platform/app/user/database/dao"
 	"platform/app/user/database/models"
@@ -14,6 +13,8 @@ import (
 	"platform/utils/school"
 	"sync"
 	"time"
+
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type UserSrv struct {
@@ -40,8 +41,11 @@ func (*UserSrv) UserPing(ctx context.Context, empty *emptypb.Empty) (resp *userP
 func (*UserSrv) UserLogin(ctx context.Context, req *userPb.UserLoginRequest) (resp *userPb.UserLoginResponse, err error) {
 	resp = new(userPb.UserLoginResponse)
 	wxLoginResp, err := utils.WXLogin(req.Code)
-	if err != nil || wxLoginResp.OpenId == "" {
-		return
+	if err != nil {
+		return nil, utils.WrapExternalAPIError(err, "微信登录")
+	}
+	if wxLoginResp.OpenId == "" {
+		return nil, utils.ErrWXLoginFailed
 	}
 	openid := wxLoginResp.OpenId
 	//openid := "oHCMZuJVYI3k1NrgjGaFxZ3a5pk8"
@@ -49,7 +53,7 @@ func (*UserSrv) UserLogin(ctx context.Context, req *userPb.UserLoginRequest) (re
 	userDao := dao.NewUserDao(ctx)
 	data, cnt, err := userDao.ExistUserByOpenid(openid)
 	if err != nil {
-		return
+		return nil, utils.WrapDatabaseError(err, "查询用户")
 	}
 	if cnt == 0 {
 		//stResp := utils.GetStuNumResp{}
@@ -62,7 +66,7 @@ func (*UserSrv) UserLogin(ctx context.Context, req *userPb.UserLoginRequest) (re
 			stResp, err = utils.GetStuNum(openid)
 			//stResp.Stuid = "2125102013"
 			if err != nil {
-				err = errors.New("找不到学号，请绑定桑梓微助手！")
+				err = utils.ErrStuNumNotFound
 				return
 			}
 		}()
@@ -70,7 +74,7 @@ func (*UserSrv) UserLogin(ctx context.Context, req *userPb.UserLoginRequest) (re
 			defer wg.Done()
 			wxInfoResp, err = utils.GetWeChatInfo(openid, wxLoginResp.AccessToken)
 			if err != nil {
-				err = fmt.Errorf("%w %w", err, errors.New("获取头像昵称错误！"))
+				err = utils.ErrWXInfoFailed
 			}
 			return
 		}()
@@ -87,7 +91,7 @@ func (*UserSrv) UserLogin(ctx context.Context, req *userPb.UserLoginRequest) (re
 		}
 		err = userDao.CreateUser(&user)
 		if err != nil {
-			return
+			return nil, utils.WrapDatabaseError(err, "创建用户")
 		}
 		token := utils.GenerateUserToken(openid, stResp.Stuid)
 		resp.Token = token

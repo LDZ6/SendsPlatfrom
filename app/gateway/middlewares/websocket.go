@@ -1,11 +1,12 @@
 package middlewares
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 	"net/http"
 	"platform/app/gateway/types"
 	"platform/utils"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 var upgrader = websocket.Upgrader{
@@ -51,7 +52,7 @@ func WsHandler() gin.HandlerFunc {
 		userClaims, err := utils.AnalyseMassesToken(auth)
 		if err != nil {
 			c.Abort()
-			types.ResponseErrorWithMsg(c, http.StatusUnauthorized, "Unauthorized")
+			types.ResponseErrorWithMsg(c, types.CodeUnauthorized, "Unauthorized")
 			return
 		}
 		c.Set("open_id", userClaims.OpenId)

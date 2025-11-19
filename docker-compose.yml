@@ -1,4 +1,4 @@
-version: "3"
+version: "3.8"
 services:
   user:
     restart: unless-stopped
@@ -6,15 +6,26 @@ services:
       driver: "json-file"
       options:
         max-size: "10m"
-        max-file: "1"
+        max-file: "3"
     build:
       dockerfile: ./app/user/cmd/Dockerfile
       context: .
       args:
         - GOPATH=..
+    environment:
+      - MYSQL_USER_PASSWORD=platform_pass_2024
+      - REDIS_USER_PASSWORD=platform_redis_2024
+      - ETCD_PASSWORD=platform_etcd_2024
     depends_on:
       - db
       - redis
+      - etcd
+    healthcheck:
+      test: ["CMD", "grpc_health_probe", "-addr=:10002"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
   bobing:
     restart: unless-stopped
     logging:
@@ -79,7 +90,7 @@ services:
       - school
       - year_bill
   db:
-    image: mysql:5.7.18
+    image: mysql:8.0.35
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -89,31 +100,32 @@ services:
     environment:
       - SET_CONTAINER_TIMEZONE=true
       - CONTAINER_TIMEZONE=Asia/Shanghai
-      - MYSQL_ROOT_PASSWORD=
-      - MYSQL_PASSWORD=
+      - MYSQL_ROOT_PASSWORD=platform_root_2024
+      - MYSQL_PASSWORD=platform_pass_2024
+      - MYSQL_DATABASE=platform
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ../mysql:/var/lib/mysql
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --init-connect='SET NAMES utf8mb4;' --innodb-flush-log-at-trx-commit=0
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --init-connect='SET NAMES utf8mb4;' --innodb-flush-log-at-trx-commit=0 --default-authentication-plugin=mysql_native_password
     ports:
       - "10821:3306"
 
   redis:
-    image: redis:7.0.12-alpine
+    image: redis:7.2.3-alpine
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "1"
-    command: redis-server --requirepass
+    command: redis-server --requirepass platform_redis_2024
     volumes:
       - ../redis:/data
     ports:
       - "10916:6379"
 
   etcd:
-    image: bitnami/etcd:3.4.15
+    image: bitnami/etcd:3.5.10
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -127,12 +139,12 @@ services:
       ALLOW_NONE_AUTHENTICATION: "no"
       ETCD_ADVERTISE_CLIENT_URLS: "http://etcd:2379"
       ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
-      ETCD_ROOT_PASSWORD: ""
+      ETCD_ROOT_PASSWORD: "platform_etcd_2024"
     ports:
       - "62379:2379"
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.13-management
     container_name: "rabbitmq"
     ports:
       - 5672:5672
@@ -143,8 +155,8 @@ services:
     environment:
       - SET_CONTAINER_TIMEZONE=true
       - CONTAINER_TIMEZONE=Asia/Shanghai
-      - RABBITMQ_DEFAULT_USER=
-      - RABBITMQ_DEFAULT_PASS=
+      - RABBITMQ_DEFAULT_USER=platform
+      - RABBITMQ_DEFAULT_PASS=platform_mq_2024
     restart: unless-stopped
     logging:
       driver: "json-file"

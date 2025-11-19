@@ -1,17 +1,20 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
-	swaggerfiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "platform/app/gateway/cmd/docs"
 	"platform/app/gateway/internal"
 	"platform/app/gateway/middlewares"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func Router() *gin.Engine {
 	r := gin.Default()
 	r.Use(middlewares.Cors())
+	r.Use(middlewares.RequestTimeout(5 * time.Second))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	ping := r.Group("/ping")
 	registerPing(ping)

@@ -2,63 +2,50 @@ package dao
 
 import (
 	"context"
-	"fmt"
-	"github.com/sirupsen/logrus"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"os"
+	"platform/app/common/database"
 	"platform/app/user/database/models"
-	"platform/config"
-	"strings"
-	"time"
+
+	"gorm.io/gorm"
 )
 
 var _db *gorm.DB
+var dbInit *database.UnifiedDBInit
 
-func InitDB() {
-	mConfig := config.Conf.MySQL["user"]
-	host := mConfig.Host
-	port := mConfig.Port
-	database := mConfig.Database
-	username := mConfig.UserName
-	password := mConfig.Password
-	charset := mConfig.Charset
-	dsn := strings.Join([]string{username, ":", password, "@tcp(", host, ":", port, ")/", database, "?charset=" + charset + "&parseTime=true&loc=Asia%2FShanghai"}, "")
-	err := Database(dsn)
-	if err != nil {
-		fmt.Println(err)
+// InitDB 初始化数据库
+func InitDB() error {
+	// 定义用户服务的模型
+	models := []interface{}{
+		&models.User{},
 	}
+
+	// 创建统一数据库初始化实例
+	dbInit = database.NewUnifiedDBInit("user", models)
+
+	// 初始化数据库
+	err := dbInit.InitDB()
+	if err != nil {
+		return err
+	}
+
+	_db = dbInit.GetDB()
+	return nil
 }
 
-func migration() {
-	// 自动迁移模式
-	err := _db.Set("gorm:table_options", "charset=utf8mb4").
-		AutoMigrate(&models.User{})
-	//Create(&models.User{})
-	if err != nil {
-		logrus.Info("register table fail")
-		os.Exit(0)
-	}
-	logrus.Info("register table success")
-}
-
-func Database(connString string) (err error) {
-	db, err := gorm.Open(mysql.Open(connString), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-	sqlDB, _ := db.DB()
-	sqlDB.SetMaxIdleConns(20)  // 设置连接池，空闲
-	sqlDB.SetMaxOpenConns(100) // 打开
-	sqlDB.SetConnMaxLifetime(time.Second * 30)
-	_db = db
-	migration()
-	//user := models.User{IsAdmin: 0, Organization: 0}
-	//db.Where("is_admin=?", 1).Updates(user)
-	return err
-}
-
+// NewDBClient 创建数据库客户端
 func NewDBClient(ctx context.Context) *gorm.DB {
-	db := _db
-	return db.WithContext(ctx)
+	if dbInit != nil {
+		return dbInit.NewDBClient(ctx)
+	}
+	if _db != nil {
+		return _db.WithContext(ctx)
+	}
+	return nil
+}
+
+// SetDB 设置数据库实例
+func SetDB(db *gorm.DB) {
+	_db = db
+	if dbInit != nil {
+		dbInit.SetDB(db)
+	}
 }

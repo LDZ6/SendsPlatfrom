@@ -36,7 +36,6 @@ func ParseValue(value []byte) (Server, error) {
 	if err := json.Unmarshal(value, &server); err != nil {
 		return server, err
 	}
-
 	return server, nil
 }
 
